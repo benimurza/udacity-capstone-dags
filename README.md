@@ -6,6 +6,9 @@ This project is partially based on the Udacity Data Engineering pipelines lesson
 ### Description
 The project represents an Airflow DAG, which uses custom operators to copy data from S3 and load it into Redshift, in a star schema. The DAG also contains a custom operator which performs data quality checks after the data has been loaded.
 
+The following image shows the tree view of the DAG:
+![DAG tree view](airflow_dag_tree_view.png)
+
 ### Data dictionary
 * interest_rates table:
     * effective_rates: represents the effective Federal Interest Rate

@@ -97,6 +97,24 @@ create_fact_table = LoadFactOperator(
     sql=SqlQueries.stock_analysis_table_insert
 )
 
+
+check_staging_entries = DataQualityOperator(
+    task_id='check_staging_entries',
+    dag=dag,
+    redshift_conn_id="redshift",
+    sql="SELECT count(*) FROM staging_stocks",
+    result=0,
+    test_operator=operator.gt
+)
+
+check_time_entries = DataQualityOperator(
+    task_id='check_time_entries',
+    dag=dag,
+    redshift_conn_id="redshift",
+    sql="SELECT cast((SELECT count(*) from time)=(SELECT count(*) from stock_analysis) as int)",
+    result=1,
+    test_operator=operator.eq
+)
 end_operator = DummyOperator(task_id='Execution_done', dag=dag)
 
 start_operator >> [stage_symbols_to_redshift, stage_interest_rates_to_redshift, stage_news_to_redshift,
@@ -107,4 +125,6 @@ create_time_dimension_table
 
 create_time_dimension_table >> create_fact_table
 
-create_fact_table >> end_operator
+create_fact_table >> check_staging_entries
+check_staging_entries >> check_time_entries
+check_time_entries >> end_operator
